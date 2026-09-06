@@ -1,10 +1,23 @@
 name: keepalive
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/10 1-19 * * *'  # 06:00-24:00 Tashkent (UTC+5)
   workflow_dispatch:
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - run: curl -fsS https://jadval-bot.onrender.com/ || echo "ping failed"
+      - name: Ping jadval-bot (каждые 10 мин)
+        run: curl -fsS https://jadval-bot.onrender.com/ && echo "jadval-bot OK" || echo "jadval fail"
+
+      - name: Ping others (каждые 30 мин)
+        run: |
+          M=$(date +%M)
+          if [ $((10#$M % 30)) -eq 0 ]; then
+            echo "30m tick ($M) — ping others"
+            curl -fsS https://blackpink-bot.onrender.com/ && echo "blackpink OK" || echo "blackpink fail"
+            curl -fsS https://qr-test-bot.onrender.com/health && echo "qr-test OK" || echo "qr-test fail"
+            curl -fsS https://jahongir-monitor-bot.onrender.com/ && echo "monitor OK" || echo "monitor fail"
+          else
+            echo "skip others (M=$M, not 00/30)"
+          fi
