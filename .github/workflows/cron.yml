@@ -1,7 +1,7 @@
 name: jadval-cron
 on:
   schedule:
-    - cron: "* * * * *"
+    - cron: "*/5 2-8 * * 1-6"
   workflow_dispatch:
 permissions:
   contents: write
