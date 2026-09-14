@@ -1,0 +1,26 @@
+name: jadval-cron
+on:
+  schedule:
+    - cron: "* * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: python cron.py
+      - run: |
+          if git diff --quiet; then echo "no changes"; exit 0; fi
+          git config user.name "jadval-bot"
+          git config user.email "bot@jadval"
+          git add chats.json .cron_state.json
+          git commit -m "update chats/state [skip ci]" || true
+          git push
